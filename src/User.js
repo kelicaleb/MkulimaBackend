@@ -93,7 +93,7 @@ User.post("/login/user", async(req, res) => {
         if(email){ 
             const comparePassword = await bcrypt.compare(password, findUser.password)
             if(comparePassword){ 
-                return res.status(200).json
+                return res.status(200).json(findUser)
             }
             else{ 
                 return res.status(400).json({message: "Wrong password"})
