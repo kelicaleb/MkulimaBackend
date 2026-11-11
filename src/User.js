@@ -109,3 +109,25 @@ User.post("/login/user", async(req, res) => {
         return res.status(500).json({message:"Internal server error"})
     }
 })
+// register lender 
+User.post("/register/lender", async(req, res) => { 
+    try{ 
+        const {first_name, last_name, password, email} = req.body; 
+        const salt = await bcrypt.genSalt(10)
+        const hash = await bcrypt.hash(password, salt)
+        const today = new Date()
+        const createUser = await users.create({
+            first_name:first_name, 
+            last_name:last_name, 
+            password:hash, 
+            role:"Lender", 
+            created_at:today,
+            email:email
+        })
+        return res.status(200).json(createUser )
+    }
+    catch(err){ 
+        console.error("Failed to create user", err)
+        return res.status(500).json({message:"Internal server error"})
+    }
+})
