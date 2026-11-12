@@ -131,3 +131,33 @@ User.post("/register/lender", async(req, res) => {
         return res.status(500).json({message:"Internal server error"})
     }
 })
+
+//login lender
+User.post("/login/lender", async(req, res) => { 
+    try{ 
+        const {email, password} = req.body; 
+        const findUser = await users.findOne({ 
+            where:{ 
+                email:email, 
+                role:"Lender"
+            }
+        })
+        if(findUser){ 
+            const comparePassword = await bcrypt.compare(password, findUser.password)
+            if(comparePassword){ 
+                return res.status(200).json(findUser)
+            }
+            else{ 
+                return res.status(400).json({message:"Wrong password"})
+            }
+        }
+        else{ 
+            console.log("this is the email", email)
+            return res.status(400).json({message:"Wrong email"})
+        }
+    }
+    catch(err){ 
+        console.error("Failed to login internal server error", err)
+        return res.status(500).json({message:"Internal server error"})
+    }
+})

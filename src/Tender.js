@@ -63,3 +63,42 @@ Tender.get("/", async(req, res) => {
         return res.status(500).json({message:"internal server error"})
     }
 })
+//get user tender
+Tender.get("/:user_id", async(req, res) => { 
+    try{ 
+        const {user_id} = req.params; 
+        const findUserTender = await tenders.findAll({ 
+            where:{ 
+                lender_id:user_id
+            }
+        })
+        return res.status(200).json(findUserTender)
+    }
+    catch(err){ 
+        console.error("Failed to fetch user tender", err)
+        return res.status(500).json({message: "Internal server error"})
+    }
+})
+//post tender 
+Tender.post("/addTender/:user_id", async(req, res)=> { 
+    try{ 
+        const {user_id} = req.params; 
+        const {title, description, budget, category }  = req.body
+        const today = new Date();
+        const dataIn30Days = new Date(today);
+        const createTender = await tenders.create({ 
+            lender_id:user_id, 
+            title:title, 
+            description:description, 
+            budget:budget, 
+            deadline:dataIn30Days.setDate(today.getDate() + 30), 
+            created_at:today, 
+            category:category
+        })
+        return res.status(200).json(createTender)
+    }
+    catch(err){ 
+        console.error("Failed to create tender", err)
+        return res.status(500).json({message:"Internal server error"})
+    }
+})
