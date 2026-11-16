@@ -26,10 +26,7 @@ export const tenders = sequelize.define("tender", {
         allowNull:false, 
         type:DataTypes.STRING
     }, 
-    description:{
-        allowNull:false, 
-        type:DataTypes.STRING
-    }, 
+  
     budget:{
         allowNull:false, 
         type:DataTypes.DECIMAL
@@ -45,7 +42,11 @@ export const tenders = sequelize.define("tender", {
     category:{ 
         allowNull:false, 
         type:DataTypes.STRING
-    }
+    },
+       description:{
+        allowNull:false, 
+        type:DataTypes.TEXT
+    },
 }, 
 { 
     tableName:"tender", 
@@ -83,17 +84,18 @@ Tender.get("/:user_id", async(req, res) => {
 Tender.post("/addTender/:user_id", async(req, res)=> { 
     try{ 
         const {user_id} = req.params; 
-        const {title, description, budget, category }  = req.body
+        const {title,  budget, category, description }  = req.body
         const today = new Date();
         const dataIn30Days = new Date(today);
         const createTender = await tenders.create({ 
             lender_id:user_id, 
             title:title, 
-            description:description, 
             budget:budget, 
             deadline:dataIn30Days.setDate(today.getDate() + 30), 
             created_at:today, 
-            category:category
+            category:category,           
+            description:description, 
+
         })
         return res.status(200).json(createTender)
     }

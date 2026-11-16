@@ -161,3 +161,77 @@ User.post("/login/lender", async(req, res) => {
         return res.status(500).json({message:"Internal server error"})
     }
 })
+//check user role 
+User.get("/userRole/:user_id", async(req, res) => { 
+    try{ 
+        const {user_id } = req.params;
+        const findUserRole = await users.findOne({ 
+            where:{ 
+                id:user_id
+            }
+        })
+        return res.status(200).json(findUserRole.role)
+        
+    }
+    catch(err){ 
+        console.error("Failed to get user Role", err)
+        return res.status(500).json({message:"Internal server error"})
+    }
+})
+//change password 
+User.patch("/changePassword/:user_id", async(req, res) => { 
+    try{ 
+        const {user_id } = req.params; 
+        const {password, confirmPassword} = req.body; 
+        const findUser = await users.findOne({ 
+            where:{ 
+                id:user_id
+            }
+        })
+    
+        if(password == confirmPassword){ 
+          const comparePassword = await  bcrypt.compare(password, findUser.password)
+          if(comparePassword){ 
+            return res.status(400).json({message:"Cannot use old password"})
+          }
+          else{ 
+            const salt = await bcrypt.genSalt(10)
+            const hash = await bcrypt.hash(password, salt)
+            const updatedPassword = await users.update({
+                password:hash,
+           
+            },{
+            where:{
+                id:user_id
+            }
+            }
+           )
+           return res.status(200).json(updatedPassword)
+          }
+        }
+        else{ 
+            return res.status(400).json({message:"password did not match"})
+        }
+
+    }
+    catch(err){ 
+        console.error('Failed to update password', err)
+        return res.status(500).json({message:"internal server error"})
+    }
+})
+//user details 
+User.get("/details/:user_id", async(req, res) => { 
+    try{ 
+        const {user_id } = req.params; 
+        const findUserDetails = await users.findOne({
+            where:{ 
+                id:user_id
+            }
+        })
+        return res.status(200).json(findUserDetails)
+    }
+    catch(err){ 
+        console.error("Failed to get user details", err)
+        return res.status(500).json({message:"Internal server error"})
+    }
+})
