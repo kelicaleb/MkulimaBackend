@@ -5,6 +5,7 @@ import './Associations/Associations.js'
 import { User } from './src/User.js'
 import {Tender } from './src/Tender.js'
 import { LenderInsights } from './src/LenderInsights.js'
+import {TenderApplication} from './src/TenderApplication.js'
 
 
 dotenv.config()
@@ -15,6 +16,7 @@ app.use(express.json())
 app.use('/users', User)
 app.use("/tender", Tender)
 app.use('/insights', LenderInsights)
+app.use("/tenderapplication", TenderApplication)
 const port = process.env.PORT
 
 
