@@ -1,7 +1,8 @@
 import express from 'express'
 import {sequelize} from './Db.js'
-import {DataTypes} from 'sequelize'
-import {users } from './User.js'
+import {DataTypes, Op} from 'sequelize'
+import {users } from './User.js'; 
+import {tenderapplications }from './TenderApplication.js'
 
 
 export const Tender = express.Router() 
@@ -104,3 +105,27 @@ Tender.post("/addTender/:user_id", async(req, res)=> {
         return res.status(500).json({message:"Internal server error"})
     }
 })
+//filter tender availability 
+Tender.get("/availableTenders/:user_id", async(req, res) => { 
+    try{ 
+        const {user_id } = req.params; 
+        const findAppliedTenders = await tenderapplications.findAll({ 
+            where:{ 
+                user_id:user_id
+            }
+        })
+        const tendersid = findAppliedTenders.map((data) => data.tender_id)
+        const finalTenders = await tenders.findAll({ 
+            where:{ 
+                id:{ 
+                    [Op.notIn]: tendersid
+                }
+            }
+        })
+        return res.status(200).json(finalTenders)
+    }
+    catch(err){ 
+        console.error("Failed to find available tenders ", err)
+        return res.status(500).json({message:"Internal server error"})
+    }
+}  )

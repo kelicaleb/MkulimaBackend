@@ -75,7 +75,19 @@ TenderApplication.post("/createTenderApplication/:user_id", upload.single('propo
     try{ 
         const { user_id } = req.params; 
         const {tender_id, company_name, bid_amount,} = req.body; 
-        const createTenderApplications = await tenderapplications.create({ 
+        const findBudget = await tenders.findOne({ 
+            where:{
+                id:tender_id 
+            }
+        })
+        const findUserApplications = await tenderapplications.findAll({
+            where:{ 
+                id:user_id
+            }
+        })
+        findUserApplications.forEach(async (data) => { 
+        if(parseInt(bid_amount) <= findBudget.budget && data.tender_id != tender_id ){ 
+              const createTenderApplications = await tenderapplications.create({ 
             tender_id:tender_id, 
             user_id:user_id, 
             company_name:company_name, 
@@ -85,9 +97,39 @@ TenderApplication.post("/createTenderApplication/:user_id", upload.single('propo
 
         })
         return res.status(200).json(createTenderApplications)
+
+        }
+        else if(data.tender_id == tender_id){ 
+            return res.status(400).json({message:"Cannot bid twice on the same tender"})
+        }
+        else{ 
+            console.log("This is the bid amount", bid_amount)
+            console.log("This is the budget", findBudget.budget)
+            return res.status(400).json({message:"Cannot bid greater than budget"})
+        }
+        })
+      
     }
     catch(err){ 
         console.error("Failed to apply tender", err)
+        return res.status(500).json({message:"Internal server error"})
+    }
+})
+
+//get user tender application 
+TenderApplication.get("/getapplications/:user_id", async(req, res)=> { 
+    try{ 
+        const {user_id }= req.params; 
+        const findtenderApplications = await users.findAll({  
+            where:{ 
+                id:user_id
+            }
+        })
+        return res.status(200).json(findtenderApplications)
+
+    }
+    catch(err){ 
+        console.error("Failed to fetch user applications", err)
         return res.status(500).json({message:"Internal server error"})
     }
 })

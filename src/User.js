@@ -235,3 +235,19 @@ User.get("/details/:user_id", async(req, res) => {
         return res.status(500).json({message:"Internal server error"})
     }
 })
+//get user by id
+User.get("/:user_id", async(req, res) => { 
+    try{ 
+        const {user_id} = req.params;
+        const findUsers = await users.findOne({ 
+            where:{ 
+                id:user_id
+            }
+        })
+        return res.status(200).json(findUsers)
+    }
+    catch(err){ 
+        console.error("Failed to find user", err)
+        return res.status(500).json({message:"Internale server error"})
+    }
+})
